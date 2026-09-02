@@ -1,4 +1,3 @@
-
 pipeline {
 
     agent any
@@ -27,9 +26,7 @@ pipeline {
                 echo 'Building Spring Boot application...'
 
                 sh '''
-                    chmod +x mvnw 2>/dev/null || true
-
-                    ./mvnw clean package -DskipTests
+                    mvn clean package -DskipTests
                 '''
             }
         }
@@ -39,9 +36,7 @@ pipeline {
                 echo 'Uploading artifact to Nexus...'
 
                 sh '''
-                    chmod +x mvnw 2>/dev/null || true
-
-                    ./mvnw deploy -DskipTests
+                    mvn deploy -DskipTests
                 '''
             }
         }
@@ -64,7 +59,7 @@ pipeline {
                             "whoami"
 
                         echo "======================================"
-                        echo "Creating application directory"
+                        echo "Creating deployment directory"
                         echo "======================================"
 
                         ssh -o BatchMode=yes \
@@ -73,7 +68,7 @@ pipeline {
                             "mkdir -p ${APP_DIR}"
 
                         echo "======================================"
-                        echo "Copying artifact to application server"
+                        echo "Copying JAR to application server"
                         echo "======================================"
 
                         scp -o StrictHostKeyChecking=no \
