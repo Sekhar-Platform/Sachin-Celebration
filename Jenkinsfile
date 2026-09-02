@@ -8,7 +8,7 @@ pipeline {
         APP_DIR = '/opt/hello-springboot'
         APP_NAME = 'hello-springboot'
 
-        SSH_CREDENTIALS = 'prod-server-ssh'
+        SSH_CREDENTIALS = 'prod-ssh-key'
     }
 
     stages {
