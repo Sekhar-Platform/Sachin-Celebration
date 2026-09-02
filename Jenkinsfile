@@ -31,16 +31,6 @@ pipeline {
             }
         }
 
-        stage('Push Artifact to Nexus') {
-            steps {
-                echo 'Uploading artifact to Nexus...'
-
-                sh '''
-                    mvn deploy -DskipTests
-                '''
-            }
-        }
-
         stage('Deploy to Application Server') {
             steps {
 
@@ -105,11 +95,11 @@ pipeline {
     post {
 
         success {
-            echo 'BUILD + NEXUS + DEPLOYMENT SUCCESSFUL'
+            echo 'BUILD + DEPLOYMENT SUCCESSFUL'
         }
 
         failure {
-            echo 'BUILD / NEXUS / DEPLOYMENT FAILED'
+            echo 'BUILD / DEPLOYMENT FAILED'
         }
     }
 }
