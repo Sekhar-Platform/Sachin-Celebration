@@ -5,8 +5,8 @@ pipeline {
     environment {
         APP_SERVER = '172.31.41.57'
         APP_USER = 'ubuntu'
-        APP_DIR = '/opt/hello-springboot'
-        APP_NAME = 'hello-springboot'
+        APP_DIR = '/opt/sachin-celebration'
+        APP_NAME = 'sachin-celebration'
 
         SSH_CREDENTIALS = 'prod-ssh-key'
     }
@@ -16,7 +16,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Checking out source code...'
-
                 checkout scm
             }
         }
@@ -26,7 +25,19 @@ pipeline {
                 echo 'Building Spring Boot application...'
 
                 sh '''
+                    set -e
+
+                    echo "======================================"
+                    echo "Building Spring Boot application"
+                    echo "======================================"
+
                     mvn clean package -DskipTests
+
+                    echo "======================================"
+                    echo "Build completed successfully"
+                    echo "======================================"
+
+                    ls -lh target/*.jar
                 '''
             }
         }
@@ -49,24 +60,43 @@ pipeline {
                             "whoami"
 
                         echo "======================================"
-                        echo "Creating deployment directory"
+                        echo "Preparing deployment directory"
                         echo "======================================"
 
                         ssh -o BatchMode=yes \
                             -o StrictHostKeyChecking=no \
                             ${APP_USER}@${APP_SERVER} \
-                            "mkdir -p ${APP_DIR}"
+                            "sudo mkdir -p ${APP_DIR} && sudo chown ${APP_USER}:${APP_USER} ${APP_DIR}"
+
+                        echo "======================================"
+                        echo "Deployment directory ready"
+                        echo "======================================"
+
+                        ssh -o BatchMode=yes \
+                            -o StrictHostKeyChecking=no \
+                            ${APP_USER}@${APP_SERVER} \
+                            "ls -ld ${APP_DIR}"
 
                         echo "======================================"
                         echo "Copying JAR to application server"
                         echo "======================================"
 
-                        scp -o StrictHostKeyChecking=no \
+                        scp -o BatchMode=yes \
+                            -o StrictHostKeyChecking=no \
                             target/*.jar \
                             ${APP_USER}@${APP_SERVER}:${APP_DIR}/app.jar
 
                         echo "======================================"
-                        echo "Restarting application"
+                        echo "JAR copied successfully"
+                        echo "======================================"
+
+                        ssh -o BatchMode=yes \
+                            -o StrictHostKeyChecking=no \
+                            ${APP_USER}@${APP_SERVER} \
+                            "ls -lh ${APP_DIR}/app.jar"
+
+                        echo "======================================"
+                        echo "Restarting Spring Boot application"
                         echo "======================================"
 
                         ssh -o BatchMode=yes \
@@ -95,12 +125,11 @@ pipeline {
     post {
 
         success {
-            echo 'BUILD + DEPLOYMENT SUCCESSFUL'
+            echo 'BUILD AND DEPLOYMENT SUCCESSFUL'
         }
 
         failure {
-            echo 'BUILD / DEPLOYMENT FAILED'
+            echo 'BUILD OR DEPLOYMENT FAILED'
         }
     }
 }
-
