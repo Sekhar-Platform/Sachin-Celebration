@@ -58,10 +58,9 @@ jobs:
       - name: Build Docker image
         run: docker build -t $ECR_REPOSITORY:${{ github.sha }} .
 
-      # 8. Tag Docker image
+      # 8. Tag Docker image (FIXED formatting)
       - name: Tag Docker image
-        run: docker tag \
-          $ECR_REPOSITORY:${{ github.sha }} \
+        run: docker tag $ECR_REPOSITORY:${{ github.sha }} \
           ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
 
       # 9. Push Docker image to ECR
@@ -75,7 +74,7 @@ jobs:
           echo "Image pushed successfully:"
           echo "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
 
-      # 11. Get current ECS task definition (FIXED)
+      # 11. Get current ECS task definition (FIXED to use describe)
       - name: Get current ECS task definition
         run: |
           aws ecs describe-task-definition \
