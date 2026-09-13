@@ -1,4 +1,3 @@
-
 name: Build and Push to ECR
 
 on:
@@ -15,6 +14,12 @@ permissions:
 env:
   AWS_REGION: eu-north-1
   ECR_REPOSITORY: hello-springboot
+
+  ECS_CLUSTER: hello-springboot-cluster
+  ECS_SERVICE: hello-springboot-service
+
+  ECS_TASK_DEFINITION: hello-springboot
+  ECS_CONTAINER_NAME: hello-springboot
 
 jobs:
 
@@ -69,7 +74,6 @@ jobs:
             exit 1
           fi
 
-          # Print claims only - NEVER print the complete token
           PAYLOAD=$(echo "$TOKEN" | cut -d '.' -f2 | base64 -d 2>/dev/null || true)
 
           echo "$PAYLOAD" | jq '{
@@ -146,3 +150,53 @@ jobs:
         run: |
           echo "Image pushed successfully:"
           echo "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+
+
+      # -----------------------------------------
+      # 11. Get current ECS task definition
+      # -----------------------------------------
+      - name: Get current ECS task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition $ECS_TASK_DEFINITION \
+            --query taskDefinition \
+            --output json > task-definition.json
+
+
+      # -----------------------------------------
+      # 12. Update image in task definition
+      # -----------------------------------------
+      - name: Render ECS task definition
+        id: render-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.ECS_CONTAINER_NAME }}
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+
+      # -----------------------------------------
+      # 13. Deploy to ECS
+      # -----------------------------------------
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-definition.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+
+      # -----------------------------------------
+      # 14. Deployment complete
+      # -----------------------------------------
+      - name: Deployment complete
+        run: |
+          echo "======================================"
+          echo "ECS deployment successful!"
+          echo "======================================"
+          echo "Cluster: $ECS_CLUSTER"
+          echo "Service: $ECS_SERVICE"
+          echo "Image:"
+          echo "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+
