@@ -1,0 +1,20 @@
+{
+  "family": "hello-springboot-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::632404567481:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "hello-springboot",
+      "image": "632404567481.dkr.ecr.eu-north-1.amazonaws.com/hello-springboot",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ]
+    }
+  ]
+}
