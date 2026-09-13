@@ -157,7 +157,7 @@ jobs:
       # -----------------------------------------
       - name: Get current ECS task definition
         run: |
-          aws ecs describe-task-definition \
+          aws ecs register-task-definition \
             --task-definition $ECS_TASK_DEFINITION \
             --query taskDefinition \
             --output json > task-definition.json
