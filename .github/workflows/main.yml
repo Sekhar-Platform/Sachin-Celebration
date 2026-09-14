@@ -15,7 +15,7 @@ env:
   ECR_REPOSITORY: hello-springboot
   ECS_CLUSTER: hello-springboot-cluster
   ECS_SERVICE: hello-springboot-service
-  ECS_TASK_DEFINITION: hello-springboot
+  ECS_TASK_DEFINITION: hello-springboot-task
   ECS_CONTAINER_NAME: hello-springboot
 
 jobs:
