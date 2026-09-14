@@ -65,10 +65,10 @@ jobs:
             "${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}"
 
 
-      # 9. Push Docker image to ECR
       - name: Push Docker image to ECR
-        run: docker push \
-          ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
+        run: |
+          docker push "${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}"
+
 
       # 10. Display image
       - name: Display ECR image
