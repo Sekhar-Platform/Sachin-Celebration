@@ -58,10 +58,12 @@ jobs:
       - name: Build Docker image
         run: docker build -t $ECR_REPOSITORY:${{ github.sha }} .
 
-      # 8. Tag Docker image (FIXED formatting)
+      # 8. Tag Docker image
       - name: Tag Docker image
-        run: docker tag $ECR_REPOSITORY:${{ github.sha }} \
-          ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
+        run: |
+          docker tag "$ECR_REPOSITORY:${{ github.sha }}" \
+            "${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}"
+
 
       # 9. Push Docker image to ECR
       - name: Push Docker image to ECR
